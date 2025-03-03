@@ -13,8 +13,6 @@ sys.path.insert(0, BACKEND_PATH)  # Add backend/ to Python path
 
 try:
     from ai_model.predict import predict_threat_level
-    from stem.control import Controller
-    from stem import Signal
 except ModuleNotFoundError as e:
     print(f"❌ Module Import Error: {e}")
     print("🔍 Check if ai_model.predict exists in backend/")
@@ -63,67 +61,48 @@ def scrape_page(url):
 
         if response.status_code == 200:
             text = clean_text(response.text)
-            # Debug extracted text
             print(f"📝 Cleaned Text Sample: {text[:500]}")
 
-            if len(text) < 50:  # If text is too short, retry with Selenium
-                print("⚠️ Extracted text is too short, switching to Selenium...")
-                text = scrape_with_selenium(url)
+            if len(text) < 50:
+                print("⚠️ Extracted text is too short, skipping...")
+                return None  # Skip if text is too short
 
-            score = predict_threat_level(text)  # Use AI model
+            score = predict_threat_level(text)
             print(f"✅ Scraped {len(text)} characters. Threat Score: {score}")
 
             return {
                 "url": url,
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "text": text[:500],  # Store a sample of the text
+                "text": text[:500],
                 "score": score
             }
         else:
-            return {"error": f"Failed to fetch {url} (Status: {response.status_code})"}
+            print(f"❌ Failed to fetch {url} (Status: {response.status_code})")
+            return None
     except Exception as e:
         print(f"❌ Error scraping {url}: {e}")
-        return {"error": str(e)}
+        return None
 
 
-def scrape_with_selenium(url):
-    """Uses Selenium with Tor to scrape JavaScript-rendered pages."""
-    from selenium import webdriver
-    from selenium.webdriver.firefox.options import Options
+def save_scraped_data(entry):
+    """Saves scraped data incrementally to prevent loss."""
+    existing_data = []
 
-    options = Options()
-    options.add_argument("--proxy-server=socks5h://127.0.0.1:9150")  # Use Tor
-    options.headless = True  # Run in headless mode
-
-    driver = webdriver.Firefox(options=options)
-    try:
-        driver.get(url)
-        time.sleep(5)  # Wait for JavaScript to load
-        text = clean_text(driver.page_source)
-        print(f"📝 Selenium Extracted Text Sample: {text[:500]}")  # Debugging
-    finally:
-        driver.quit()
-
-    return text
-
-
-def update_scraped_data(new_entries):
-    """Appends new scraped data to `scraped_data.json`."""
-    if not os.path.exists(SCRAPED_DATA_FILE):
-        existing_data = []
-    else:
+    # Load existing data if the file exists
+    if os.path.exists(SCRAPED_DATA_FILE):
         try:
             with open(SCRAPED_DATA_FILE, "r", encoding="utf-8") as file:
                 existing_data = json.load(file)
         except json.JSONDecodeError:
-            existing_data = []
+            print("⚠️ JSON file is corrupted. Creating a new one.")
 
-    existing_data.extend(new_entries)
+    existing_data.append(entry)
 
+    # Save updated data back to file
     with open(SCRAPED_DATA_FILE, "w", encoding="utf-8") as file:
         json.dump(existing_data, file, indent=4)
 
-    print(f"✅ {len(new_entries)} new pages scraped and logged.")
+    print(f"📁 Saved entry to {SCRAPED_DATA_FILE}")
 
 
 def start_scraping():
@@ -147,15 +126,10 @@ def start_scraping():
     ]
 
     while True:
-        new_entries = []
-
         for url in target_urls:
-            result = scrape_page(url)
-            if "error" not in result:
-                new_entries.append(result)
-
-        if new_entries:
-            update_scraped_data(new_entries)
+            entry = scrape_page(url)
+            if entry:
+                save_scraped_data(entry)
 
         print("🔄 Waiting for next scrape cycle...")
         time.sleep(60)  # Scrape every 60 seconds
