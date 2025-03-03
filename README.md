@@ -60,11 +60,10 @@ Dark Web Intelligence is an advanced system designed for real-time scraping, thr
 - The **API** provides an endpoint to query stored data and receive **real-time threat analysis**.
 - **Threat scores** range from **0 (Safe) to 10 (High Risk)**.
 
-  ![Screenshot 2025-03-03 193248](https://github.com/user-attachments/assets/b1d064f7-ce4d-4c05-84d2-91e0b18a74dc)
+![Screenshot 2025-03-03 193248](https://github.com/user-attachments/assets/b1d064f7-ce4d-4c05-84d2-91e0b18a74dc)
 ![Screenshot 2025-03-03 202936](https://github.com/user-attachments/assets/18b2f7bf-63f5-4dca-af27-0d3c93b79ff9)
-
-![Screenshot 2025-03-03 222434](https://github![Screenshot 2025-03-03 212325](https://github.com/user-attachments/assets/6af3283d-546e-441e-ba05-63238e1b7890)
-.com/user-attachments/assets/10718fd5-fd14-4a69-8394-67dbdd201af4)
+![Screenshot 2025-03-03 212325](https://github.com/user-attachments/assets/6af3283d-546e-441e-ba05-63238e1b7890)
+![Screenshot 2025-03-03 222434](https://github.com/user-attachments/assets/10718fd5-fd14-4a69-8394-67dbdd201af4)
 ![Screenshot 2025-03-03 222147](https://github.com/user-attachments/assets/4d82731c-d330-4ef8-a52f-cdb079a1599b)
 
 ## 🔥 Challenges & Solutions
