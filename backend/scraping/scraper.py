@@ -12,10 +12,10 @@ BACKEND_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, BACKEND_PATH)  # Add backend/ to Python path
 
 try:
-    from ai_model.predict import predict_threat_level
+    from ai_model.model import predict_threat_level
 except ModuleNotFoundError as e:
     print(f"❌ Module Import Error: {e}")
-    print("🔍 Check if ai_model.predict exists in backend/")
+    print("🔍 Check if ai_model.model exists in backend/")
     sys.exit(1)  # Exit if imports fail
 
 # Constants
