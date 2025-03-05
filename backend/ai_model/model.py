@@ -1,7 +1,7 @@
 import torch
-import random
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import os
+import torch.nn.functional as F
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 # Define model directory (Ensure this path is correct)
 MODEL_DIR = os.path.abspath(
@@ -14,18 +14,22 @@ model.eval()  # Set model to evaluation mode
 
 
 def predict_threat_level(text):
-    """Predicts the threat level of a given text on a scale of 0-10."""
+    """Predict threat score for given text."""
     inputs = tokenizer(text, padding="max_length",
                        truncation=True, return_tensors="pt")
     with torch.no_grad():
         outputs = model(**inputs)
 
     logits = outputs.logits
-    # 0 = Non-threat, 1 = Threat
-    prediction = torch.argmax(logits, dim=1).item()
+    probabilities = F.softmax(logits, dim=1)  # Convert logits to probabilities
 
-    # Map prediction to the new scale
-    if prediction == 1:
-        return random.randint(5, 10)  # Threat level: 5-10
-    else:
-        return random.randint(0, 4)   # Normal level: 0-4
+    # Probability of being malicious (Class 1)
+    threat_prob = probabilities[0][1].item()
+
+    # Scale scores: Normal (0-4), Malicious (5-10)
+    score = (threat_prob * 5) + 5 if threat_prob > 0.5 else threat_prob * 4
+    score = round(score, 2)  # Keep 2 decimal places for consistency
+
+    print(
+        f"🟢 Text: {text[:50]}... |  Threat Probability: {threat_prob:.2f} |  Score: {score}")
+    return score
