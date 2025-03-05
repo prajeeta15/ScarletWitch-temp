@@ -1,15 +1,22 @@
-import sys
 import os
+import sys
 import json
 import time
-from datetime import datetime
 import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+from datetime import datetime
 from bs4 import BeautifulSoup
 import re
 
 # Fix Python import path issue
 BACKEND_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.insert(0, BACKEND_PATH)  # Add backend/ to Python path
+sys.path.insert(0, BACKEND_PATH)
+PREDICTIONS_FILE = os.path.join(BACKEND_PATH, "predictions.json")
+
+# Constants
+SCRAPED_DATA_FILE = os.path.join(BACKEND_PATH, "scraped_data.json")
+GRAPH_FILE = os.path.abspath("threat_trend.png")
 
 try:
     from ai_model.model import predict_threat_level
@@ -17,9 +24,6 @@ except ModuleNotFoundError as e:
     print(f"❌ Module Import Error: {e}")
     print("🔍 Check if ai_model.model exists in backend/")
     sys.exit(1)  # Exit if imports fail
-
-# Constants
-SCRAPED_DATA_FILE = os.path.join(BACKEND_PATH, "scraped_data.json")
 
 
 def get_tor_session():
@@ -105,10 +109,63 @@ def save_scraped_data(entry):
     print(f"📁 Saved entry to {SCRAPED_DATA_FILE}")
 
 
+def save_predictions(predictions):
+    """Save predictions to a JSON file."""
+    with open(PREDICTIONS_FILE, "w", encoding="utf-8") as file:
+        json.dump(predictions, file, indent=4)
+
+
+def generate_graph():
+    """Generate a threat trend graph from scraped_data.json."""
+    if not os.path.exists(SCRAPED_DATA_FILE):
+        print("⚠️ No scraped data found!")
+        return
+
+    try:
+        with open(SCRAPED_DATA_FILE, "r", encoding="utf-8") as file:
+            data = json.load(file)
+    except json.JSONDecodeError:
+        print("❌ Error: Corrupted JSON file!")
+        return
+
+    if not data:
+        print("⚠️ No data available for graph generation.")
+        return
+
+    df = pd.DataFrame(data)
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors='coerce')
+    df.dropna(subset=["timestamp"], inplace=True)
+    df.sort_values("timestamp", inplace=True)
+
+    df["score"] = pd.to_numeric(df["score"], errors='coerce')
+
+    if df.empty:
+        print("⚠️ Not enough valid data to generate a graph.")
+        return
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(df["timestamp"], df["score"], marker="o",
+             linestyle="-", color="red", label="Threat Score")
+    plt.xlabel("Time")
+    plt.ylabel("Threat Score")
+    plt.title("Dark Web Threat Level Trend Over Time")
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.grid()
+    plt.tight_layout()
+
+    os.makedirs(os.path.dirname(GRAPH_FILE), exist_ok=True)
+    plt.savefig(GRAPH_FILE)
+    print(f"📊 Threat trend graph updated: {GRAPH_FILE}")
+    plt.close()
+
+
 def start_scraping():
     """Continuously scrapes dark web pages and updates data in real-time."""
     target_urls = [
-        "http://abacussxzkjwuzmhyusuqlx3h56bsczl2yy2bxrgujvlfnoyf7mhicad.onion/",
+        "abacus23ucanifgq7uyqevbiufvace7ibhjtmp6svffvdfdink7z6lad.onion",
+        "abacus23ucanifgq7uyqevbiufvace7ibhjtmp6svffvdfdink7z6lad.onion",
+        "abacuszbjvzqxbqfn57q6rcb26kqtw4x4r7ysbz2tklln4khpydvlaqd.onion",
         "http://styxmarket.com/",
         "https://access-bidencash.com/",
         "https://russiamarket.to/",
@@ -130,6 +187,7 @@ def start_scraping():
             entry = scrape_page(url)
             if entry:
                 save_scraped_data(entry)
+        generate_graph()
 
         print("🔄 Waiting for next scrape cycle...")
         time.sleep(60)  # Scrape every 60 seconds
