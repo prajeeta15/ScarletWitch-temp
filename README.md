@@ -14,6 +14,7 @@ For inquiries or licensing requests, contact: prajeetaacm@gmail.com
 # Dark Web Intelligence
 
 ## 📌 Project Overview
+# currently writing a research paper for this.
 Dark Web Intelligence is an advanced system designed for real-time scraping, threat analysis, and classification of dark web content. The system leverages **web scraping, machine learning (NLP), and the Tor network** to detect and analyze potential cyber threats. The goal is to assist law enforcement agencies, cybersecurity professionals, and researchers in identifying malicious activities on the dark web.
 
 ## 🚀 Features
