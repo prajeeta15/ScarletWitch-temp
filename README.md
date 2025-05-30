@@ -80,6 +80,10 @@ Dark Web Intelligence is an advanced system designed for real-time scraping, thr
 - **Advanced Deep Learning Models** (e.g., GPT-based threat detection).
 - **Expanded Dark Web Coverage** by scraping more hidden services.
 
+## Doc for research highlighting points of difference and enhancements
+  [analysis.docx](https://github.com/user-attachments/files/20514366/analysis.docx)
+
+
 ## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
