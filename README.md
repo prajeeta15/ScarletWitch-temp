@@ -1,5 +1,6 @@
-# ScarletWitch
+# ScarletWitch - writing research paper on it. still working. 
 Monitors dark web marketplaces for illicit activities and logs data while predicting for threats real-time
+
 
 
 Copyright © 2025 Prajeeta Pal
@@ -28,7 +29,7 @@ ScarletWitch is an advanced system designed for real-time scraping, threat analy
 
 ## 🛠️ Technologies Used
 - **Programming Language**: Python
-- **Machine Learning Model**: Fine-tuned **BERT** for text classification
+- **Machine Learning Model**: using ElMo and GPT4 
 - **Libraries & Frameworks**:
   - `requests`, `BeautifulSoup` (for web scraping)
   - `torch`, `transformers` (for NLP and model inference)
