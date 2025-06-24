@@ -1,0 +1,9 @@
+sentence-transformers==2.6.1
+transformers
+torch
+scikit-learn
+matplotlib
+bs4
+openai
+requests
+elasticsearch
